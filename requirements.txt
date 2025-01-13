@@ -1,0 +1,6 @@
+streamlit>=1.25.0
+spotipy>=2.23.0
+matplotlib>=3.8.0
+seaborn>=0.12.2
+reportlab>=3.6.14
+numpy>=1.26.0
