@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 def getBase(c, e=0):
-    b = ''.join([x for x in string.printable[:90] if x not in '/\\`"\',_!#$%&()*']) + '&()*$%/\\`"\',_!#'
+    b = ''.join([x for x in string.printable[:90] if x not in '/\\`"\',_!#$%&()*']) + '&()*$%/\\`"\',_!'
     return b[e:c+e]
 
 def fromBase(s, b=87, e=0):
@@ -57,9 +57,8 @@ def trimTitle(title, delimiters, trimFirst):
 
 def drawText(canvasObj, title, artist, x, y, width, maxTitle, maxArtist, fontSize, lineSpacing, showArtists=True):
     """
-    Draws the song title (in bold) and optionally the artist (in smaller font) inside a square on the bingo card.
+    Draws the song title (in bold) and artist (in smaller font) inside a square on the bingo card.
     """
-    # Draw title
     canvasObj.setFont("Helvetica-Bold", fontSize)
     titleLines = wrap(title, width)[:maxTitle]
     titleY = y
@@ -67,8 +66,8 @@ def drawText(canvasObj, title, artist, x, y, width, maxTitle, maxArtist, fontSiz
         lineY = titleY - (i * (fontSize + lineSpacing))
         canvasObj.drawCentredString(x, lineY, line)
     
-    # Conditionally draw artist
     if showArtists:
+        # Artist in smaller font
         canvasObj.setFont("Helvetica", fontSize - 5)
         artistY = y - (maxTitle * (fontSize + lineSpacing)) - fontSize + 5
         artistLines = wrap(artist, 32)
@@ -79,7 +78,7 @@ def drawText(canvasObj, title, artist, x, y, width, maxTitle, maxArtist, fontSiz
             lineY = artistY - (i * (fontSize + lineSpacing))
             canvasObj.drawCentredString(x, lineY, artistLine)
     
-    # Restore bold font for title
+    # Restore bold
     canvasObj.setFont("Helvetica-Bold", fontSize)
 
 def fetchTracks(sp, playlistId):
@@ -371,7 +370,7 @@ def drawFrequencyTable(canvasObj, stats, pageWidth, pageHeight):
         currentY -= rowHeight
 
 
-def generateBingo(cards, fileName, pageTitle, numCards):
+def generateBingo(cards, fileName, pageTitle, numCards, showArtists=True):
     """
     Generates a single PDF with:
       1) Cover + Duplicate Detection Heatmap
@@ -469,7 +468,8 @@ def generateBingo(cards, fileName, pageTitle, numCards):
                     c, titleToDraw, artistToDraw,
                     textX, textY, charLimit,
                     maxTitle, maxArtist,
-                    fontSize, lineSpacing
+                    fontSize, lineSpacing,
+                    showArtists
                 )
         c.showPage()
 
@@ -481,7 +481,6 @@ def main():
 
     defaultPlaylist = "https://open.spotify.com/playlist/2i52cVg3bFzOKCIJfymy4l"
     playlistUrl = st.text_input("Enter Spotify playlist URL", value=defaultPlaylist)
-    showArtists = st.checkbox("Show Artist Titles?", value=True)
 
     defaultDelims = ["-", "(", "[", "<", ">", "\"", ":"]
     delimitersInput = st.text_input("Custom Delimiters (comma-separated)", value=", ".join(defaultDelims))
@@ -496,6 +495,9 @@ def main():
         "Enter Client Credentials (client_id<separator>client_secret)",
         help="Separate client_id and client_secret by any non-hexadecimal character."
     )
+    
+    # New Checkbox to toggle artist visibility
+    showArtists = st.checkbox("Show Artist Names", value=True)
 
     # We use session_state to manage data across widget interactions
     if "uniqueTracks" not in st.session_state:
@@ -567,7 +569,7 @@ def main():
             else:
                 cards = createCards(uniqueTracks, numCards)
                 fileName = "bingo_cards.pdf"
-                generateBingo(cards, fileName, pageTitle, numCards)
+                generateBingo(cards, fileName, pageTitle, numCards, showArtists)
 
                 with open(fileName, "rb") as f:
                     pdfData = f.read()
