@@ -55,10 +55,11 @@ def trimTitle(title, delimiters, trimFirst):
     else:
         return re.sub(pattern + r".*", "", title).strip()
 
-def drawText(canvasObj, title, artist, x, y, width, maxTitle, maxArtist, fontSize, lineSpacing):
+def drawText(canvasObj, title, artist, x, y, width, maxTitle, maxArtist, fontSize, lineSpacing, showArtists=True):
     """
-    Draws the song title (in bold) and artist (in smaller font) inside a square on the bingo card.
+    Draws the song title (in bold) and optionally the artist (in smaller font) inside a square on the bingo card.
     """
+    # Draw title
     canvasObj.setFont("Helvetica-Bold", fontSize)
     titleLines = wrap(title, width)[:maxTitle]
     titleY = y
@@ -66,18 +67,19 @@ def drawText(canvasObj, title, artist, x, y, width, maxTitle, maxArtist, fontSiz
         lineY = titleY - (i * (fontSize + lineSpacing))
         canvasObj.drawCentredString(x, lineY, line)
     
-    # Artist in smaller font
-    canvasObj.setFont("Helvetica", fontSize - 5)
-    artistY = y - (maxTitle * (fontSize + lineSpacing)) - fontSize + 5
-    artistLines = wrap(artist, 32)
-    if len(artistLines) > maxArtist:
-        artistLines = artistLines[:maxArtist - 1] + [artistLines[maxArtist - 1][:29] + "..."]
+    # Conditionally draw artist
+    if showArtists:
+        canvasObj.setFont("Helvetica", fontSize - 5)
+        artistY = y - (maxTitle * (fontSize + lineSpacing)) - fontSize + 5
+        artistLines = wrap(artist, 32)
+        if len(artistLines) > maxArtist:
+            artistLines = artistLines[:maxArtist - 1] + [artistLines[maxArtist - 1][:29] + "..."]
 
-    for i, artistLine in enumerate(artistLines):
-        lineY = artistY - (i * (fontSize + lineSpacing))
-        canvasObj.drawCentredString(x, lineY, artistLine)
+        for i, artistLine in enumerate(artistLines):
+            lineY = artistY - (i * (fontSize + lineSpacing))
+            canvasObj.drawCentredString(x, lineY, artistLine)
     
-    # Restore bold
+    # Restore bold font for title
     canvasObj.setFont("Helvetica-Bold", fontSize)
 
 def fetchTracks(sp, playlistId):
@@ -479,6 +481,7 @@ def main():
 
     defaultPlaylist = "https://open.spotify.com/playlist/2i52cVg3bFzOKCIJfymy4l"
     playlistUrl = st.text_input("Enter Spotify playlist URL", value=defaultPlaylist)
+    showArtists = st.checkbox("Show Artist Titles?", value=True)
 
     defaultDelims = ["-", "(", "[", "<", ">", "\"", ":"]
     delimitersInput = st.text_input("Custom Delimiters (comma-separated)", value=", ".join(defaultDelims))
